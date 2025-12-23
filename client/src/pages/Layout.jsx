@@ -5,19 +5,28 @@ import { Outlet } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loadTheme } from "../features/themeSlice";
 import { Loader2Icon } from "lucide-react";
-import { useUser, SignIn } from "@clerk/clerk-react";
+import { useUser, SignIn, useAuth } from "@clerk/clerk-react";
+import { fetchWorkspaces } from "../features/workspaceSlice";
 
 const Layout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { loading } = useSelector((state) => state.workspace);
+  const { loading, workspaces } = useSelector((state) => state.workspace);
   const dispatch = useDispatch();
 
   const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
 
   // Initial load of theme
   useEffect(() => {
     dispatch(loadTheme());
   }, []);
+
+  // Initial load of workspaces
+  useEffect(() => {
+    if (isLoaded && user && workspaces.length === 0) {
+      dispatch(fetchWorkspaces({ getToken }));
+    }
+  }, [user, isLoaded]);
 
   if (!user) {
     return (
