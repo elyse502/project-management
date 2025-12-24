@@ -5,7 +5,7 @@ export const fetchWorkspaces = createAsyncThunk(
   "workspace/fetchWorkspaces",
   async ({ getToken }) => {
     try {
-      const { data } = api.get("/api/workspaces", {
+      const { data } = await api.get("/api/workspaces", {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
       return data.workspaces || [];
