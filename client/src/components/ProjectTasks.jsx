@@ -109,10 +109,15 @@ const ProjectTasks = ({ tasks }) => {
       );
       if (!confirm) return;
 
+      const token = await getToken();
+
       toast.loading("Deleting tasks...");
 
-      //  Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await api.post(
+        "/api/tasks/delete",
+        { taskIds: selectedTasks },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       dispatch(deleteTask(selectedTasks));
 
