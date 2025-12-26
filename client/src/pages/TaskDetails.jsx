@@ -5,13 +5,16 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CalendarIcon, MessageCircle, PenIcon } from "lucide-react";
 import { assets } from "../assets/assets";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import api from "../configs/api";
 
 const TaskDetails = () => {
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get("projectId");
   const taskId = searchParams.get("taskId");
 
-  const user = { id: "user_1" };
+  const { user } = useUser();
+  const { getToken } = useAuth();
   const [task, setTask] = useState(null);
   const [project, setProject] = useState(null);
   const [comments, setComments] = useState([]);
@@ -20,7 +23,20 @@ const TaskDetails = () => {
 
   const { currentWorkspace } = useSelector((state) => state.workspace);
 
-  const fetchComments = async () => {};
+  const fetchComments = async () => {
+    if (!taskId) return;
+
+    try {
+      const token = await getToken();
+      const { data } = await api.get(`/api/comments/${taskId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setComments(data.comments || []);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message);
+    }
+  };
 
   const fetchTaskDetails = async () => {
     setLoading(true);
