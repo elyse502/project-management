@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CalendarIcon, MessageCircle, PenIcon } from "lucide-react";
-import { assets } from "../assets/assets";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import api from "../configs/api";
 
@@ -59,17 +58,16 @@ const TaskDetails = () => {
     try {
       toast.loading("Adding comment...");
 
-      //  Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const token = await getToken();
+      const { data } = await api.post(
+        "/api/comments",
+        { taskId: task.id, content: newComment },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-      const dummyComment = {
-        id: Date.now(),
-        user: { id: 1, name: "User", image: assets.profile_img_a },
-        content: newComment,
-        createdAt: new Date(),
-      };
-
-      setComments((prev) => [...prev, dummyComment]);
+      setComments((prev) => [...prev, data.comment]);
       setNewComment("");
       toast.dismissAll();
       toast.success("Comment added.");
